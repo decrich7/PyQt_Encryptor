@@ -13,7 +13,6 @@ form_aes_encr, base_aes_encr = uic.loadUiType('ui_designs/aes_enc.ui')
 form_aes_decr, base_aes_decr = uic.loadUiType('ui_designs/aes_dec.ui')
 
 
-
 class MyWidget(base_1, form_1):
     def __init__(self):
         super(base_1, self).__init__()
@@ -129,7 +128,7 @@ class AlgoritmDecript(form_algoritm, base_algoritm):
     def __init__(self):
         super(base_algoritm, self).__init__()
         self.setupUi(self)
-        self.Button_RSA.clicked.connect(self.rsa)
+        self.Button_AES.clicked.connect(self.aes)
         self.Button_Cezar.clicked.connect(self.caesar_cipher_dec)
         self.pushButton.clicked.connect(self.beak_to_MyWidget)
 
@@ -138,8 +137,10 @@ class AlgoritmDecript(form_algoritm, base_algoritm):
         self.mywidget.show()
         self.close()
 
-    def rsa(self):
-        pass
+    def aes(self):
+        self.aesdecr = AesDecr()
+        self.aesdecr.show()
+        self.close()
 
     def caesar_cipher_dec(self):
         self.window_caesar_dec = WindowCaesarDec()
@@ -151,35 +152,32 @@ class AesDecr(form_aes_decr, base_aes_decr):
     def __init__(self):
         super(base_aes_decr, self).__init__()
         self.setupUi(self)
-        self.pushButton.clicked.connect(self.encrypt)
+        self.pushButton.clicked.connect(self.decrypt)
         self.pushButton_2.clicked.connect(self.beak_to_alg_enc)
         self.pushButton_3.clicked.connect(self.beak_to_my_widg)
 
-    def encrypt(self):
+    def decrypt(self):
         text_enc = self.textEdit_2.toPlainText()
-        if self.radioButton_3.isChecked():
-            if text_enc != '':
-                aes_256 = Aes(256)
-                aes_256.generate_key()
-                self.textEdit.setText(str(aes_256.enc_aes(text_enc)))
-                self.textEdit_3.setText(aes_256.print_key())
-        elif self.radioButton_2.isChecked():
-            if text_enc != '':
-                aes_128 = Aes(128)
-                aes_128.generate_key()
-                text = str(aes_128.enc_aes(text_enc))
-                self.textEdit.setText(text)
-                self.textEdit_3.setText(aes_128.print_key())
+        key = self.textEdit_3.toPlainText()
+        if text_enc != '':
+            aes = Aes(128)
+            self.textEdit.setText(str(aes.dec_aes(text_enc, key)))
+            # aes_256.generate_key()
+            # self.textEdit.setText(str(aes_256.enc_aes(text_enc)))
+            # self.textEdit_3.setText(aes_256.print_key())
 
-    def beak_to_alg_enc(self):
-        self.alg_enc = AlgoritmEncript()
-        self.alg_enc.show()
-        self.close()
 
-    def beak_to_my_widg(self):
-        self.mywidget = MyWidget()
-        self.mywidget.show()
-        self.close()
+def beak_to_alg_enc(self):
+    self.alg_enc = AlgoritmEncript()
+    self.alg_enc.show()
+    self.close()
+
+
+def beak_to_my_widg(self):
+    self.mywidget = MyWidget()
+    self.mywidget.show()
+    self.close()
+
 
 class WindowCaesarDec(form_ceasar_dec, base_ceasar_dec):
     def __init__(self):

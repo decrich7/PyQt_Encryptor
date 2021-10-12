@@ -15,23 +15,23 @@ import pyaes
 
 # A 256 bit (32 byte) key
 key = "This_key_for_dem"
-plaintext = "Text may be any length you wish, no padding is required"
+# plaintext = "авправправпрарпаправп".encode('utf-8')
 
 # key must be bytes, so we convert it
 key = key.encode('utf-8')
 
-aes = pyaes.AESModeOfOperationCTR(key)
-ciphertext = aes.encrypt(plaintext)
-
-# show the encrypted data
-print (ciphertext)
+# aes = pyaes.AESModeOfOperationCTR(key)
+# ciphertext = aes.encrypt(plaintext)
+#
+# # show the encrypted data
+# print(ciphertext)
 
 # DECRYPTION
 # CRT mode decryption requires a new instance be created
 aes = pyaes.AESModeOfOperationCTR(key)
-
+d = "\x00\xeb8\x06kl\x11\x16\x10E\xda\xd9\x94\xe6[hO\xfe*\x9d\x1f\x93\xbc1-\xc9\xe3\xed'\x84F\x8e-g\x91\xbc\x17\xb64_\xafY"
 # decrypted data is always binary, need to decode to plaintext
-decrypted = aes.decrypt(ciphertext).decode('utf-8')
+decrypted = aes.decrypt(d).decode('utf-8')
 
 # True
-print (decrypted == plaintext)
+print(decrypted)
