@@ -27,17 +27,20 @@ class Aes:
         plaintext = message.encode('utf-8')
         key = self.key.encode('utf-8')
         aes = pyaes.AESModeOfOperationCTR(key)
-        return str(aes.encrypt(plaintext))[2:-1]
+        str_aes = aes.encrypt(plaintext)
+        txt = base64.b64encode(str_aes)
+        return txt.decode('utf-8')
 
     def dec_aes(self, message, key):
+
         aes = pyaes.AESModeOfOperationCTR(key.encode('utf-8'))
         decrypted = aes.decrypt(message).decode('utf-8')
         return decrypted
 
-
 # ex = Aes(128)
 # ex.generate_key()
-# dfg = ex.enc_aes('Внутри генерировters ые буквы.Чтобы сгенерировать')
+# dfg = ex.enc_aes('За эту победу юный князь Александр получил почетное прозвище Невский.')
 # print(ex.print_key(), 'key')
 # print(dfg)
-# print(ex.dec_aes('\xe2\x003\xc5\xf4|L\xbd\x17\x92\xdbG\xde\x07F\xf6\xbeL\x8c\xb1\xfc~\xfc$\x06\x8bFB\xb1\xc8\xab\x03\xa0*\x99]\xa0&\xeb\x0f\x98\x98\xa0\xd8\xe3f\xa6?\xc0B\xad\xa8\x8a\xc5\x8eE\x16Y6,\x87\xfd\xa5L\x90\t\xeck\xa7l\xb8\x1et\x13\xd4\x81\x9f<\xf3\x82K\x85l\x02\xef\x9f\xff\xec\xe2', 'mlnvynhwzcnaicci'))
+# # print('\xb1w\x8e\xd1\xfd\xc0\xc9\xf9\xe2\r7D\x9b3c^)\xb6\xa6J\xf7\x1d\x8a7\x91d\x00\xa6\xca'.decode('utf-8'))
+# print(ex.dec_aes(b'\x08`\xdd\xe1\xc1\x04W\xfc!\x9b\x8a:\xbeB+\x99\xf2\xf3#H\xd1\\\xc9\xde\x9aC\xd1\xb5\x90e\x87j\x9d\xfd\x18:\xc13B\xa9$*\x7f\x08\x13\xcb\xfc\x82L\x18\x88\xf2\x16\xca.\xe6\x9bd\xa9\x18\xdf\xe0\x1173\xf1\xa7\x02\xa8j\x81\xf8\xac?\x7f\x00\x03\xbcd$\x01\xdb.\xe3`\xe9\x96\xee)', 'qpiynjhuwopepwvv'))

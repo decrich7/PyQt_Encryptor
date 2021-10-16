@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+import base64
+
 from encryption_algorithms.caesar_cipher import CaesarRu, CaesarEn
 from encryption_algorithms.AES import Aes
 import sys
@@ -158,25 +160,21 @@ class AesDecr(form_aes_decr, base_aes_decr):
 
     def decrypt(self):
         text_enc = self.textEdit_2.toPlainText()
+        text_enc = base64.b64decode(text_enc)
         key = self.textEdit_3.toPlainText()
         if text_enc != '':
             aes = Aes(128)
-            self.textEdit.setText(str(aes.dec_aes(text_enc, key)))
-            # aes_256.generate_key()
-            # self.textEdit.setText(str(aes_256.enc_aes(text_enc)))
-            # self.textEdit_3.setText(aes_256.print_key())
+            self.textEdit.setText(aes.dec_aes(text_enc, key))
 
+    def beak_to_alg_enc(self):
+        self.alg_enc = AlgoritmEncript()
+        self.alg_enc.show()
+        self.close()
 
-def beak_to_alg_enc(self):
-    self.alg_enc = AlgoritmEncript()
-    self.alg_enc.show()
-    self.close()
-
-
-def beak_to_my_widg(self):
-    self.mywidget = MyWidget()
-    self.mywidget.show()
-    self.close()
+    def beak_to_my_widg(self):
+        self.mywidget = MyWidget()
+        self.mywidget.show()
+        self.close()
 
 
 class WindowCaesarDec(form_ceasar_dec, base_ceasar_dec):
