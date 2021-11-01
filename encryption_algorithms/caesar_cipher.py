@@ -40,7 +40,7 @@ class CaesarRu:
                     caesar = caesar + chr(ord(i) - self.key)
             else:
                 caesar = caesar + i
-        return caesar
+        return caesar.replace('Ъ', 'ы')
 
 
 class CaesarEn:
@@ -84,5 +84,5 @@ class CaesarEn:
                     caesar = caesar + chr(ord(i) - self.key)
             else:
                 caesar = caesar + i
-        return caesar
+        return caesar.replace('Ъ', 'ы')
 

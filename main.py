@@ -1,24 +1,44 @@
 # -*- coding: utf-8 -*-
 import base64
+import sqlite3
 
+import psycopg2
+
+from DB_API import Database
 from encryption_algorithms.caesar_cipher import CaesarRu, CaesarEn
 from encryption_algorithms.AES import Aes
+from encryption_algorithms.RSA import Rsa
 import sys
-from PyQt5 import uic
-from PyQt5.QtWidgets import QApplication, QMainWindow
+from PyQt5 import uic, QtWidgets, QtGui, QtCore
+from PyQt5.QtWidgets import QApplication, QMessageBox, QDialogButtonBox, QColorDialog, QPushButton, QInputDialog
+from untitled import Ui_MainWindow
 
-form_1, base_1 = uic.loadUiType('ui_designs/untitled.ui')
+db = Database()
+# form_1, base_1 = uic.loadUiType('ui_designs/untitled.ui')
 form_algoritm, base_algoritm = uic.loadUiType('ui_designs/algoritm_encript.ui')
 form_ceasar, base_ceasar = uic.loadUiType('ui_designs/caesar.ui')
 form_ceasar_dec, base_ceasar_dec = uic.loadUiType('ui_designs/caesar_dec.ui')
 form_aes_encr, base_aes_encr = uic.loadUiType('ui_designs/aes_enc.ui')
 form_aes_decr, base_aes_decr = uic.loadUiType('ui_designs/aes_dec.ui')
+form_rsa_encr, base_rsa_encr = uic.loadUiType('ui_designs/rsa_enc.ui')
+form_rsa_encr, base_rsa_encr = uic.loadUiType('ui_designs/rsa_dec.ui')
+
+list1 = []
 
 
-class MyWidget(base_1, form_1):
+class MyWidget(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
-        super(base_1, self).__init__()
+        super().__init__()
         self.setupUi(self)
+        if len(list1) == 0:
+            name, ok_pressed = QInputDialog.getText(self, "Nickname", "Введите ваш Nickname")
+            list1.append(name)
+            if ok_pressed:
+                try:
+                    db.insert_name(name)
+                except sqlite3.IntegrityError:
+                    pass
+
         self.pushButton.clicked.connect(self.run_algoritm_encript)
         self.pushButton_2.clicked.connect(self.run_algoritm_decript)
 
@@ -37,15 +57,19 @@ class AlgoritmEncript(form_algoritm, base_algoritm):
     def __init__(self):
         super(base_algoritm, self).__init__()
         self.setupUi(self)
-        # self.Button_RSA.clicked.connect(self.rsa)
+        self.Button_RSA.clicked.connect(self.rsa)
         self.Button_Cezar.clicked.connect(self.Caesar_Cipher)
         self.Button_AES.clicked.connect(self.aes)
         self.pushButton.clicked.connect(self.beak_to_MyWidget)
 
-    #
     def beak_to_MyWidget(self):
         self.mywidget = MyWidget()
         self.mywidget.show()
+        self.close()
+
+    def rsa(self):
+        self.rsa = RsaEnc()
+        self.rsa.show()
         self.close()
 
     def aes(self):
@@ -60,6 +84,49 @@ class AlgoritmEncript(form_algoritm, base_algoritm):
         # enc_caesar = Caesar()
 
 
+class RsaEnc(form_rsa_encr, base_rsa_encr):
+    def __init__(self):
+        super(base_rsa_encr, self).__init__()
+        self.setupUi(self)
+        self.pushButton.clicked.connect(self.encrypt)
+        self.pushButton_2.clicked.connect(self.beak_to_alg_enc)
+        self.pushButton_3.clicked.connect(self.beak_to_my_widg)
+
+    def encrypt(self):
+        text_enc = self.textEdit_2.toPlainText()
+        if text_enc != '':
+            rsa = Rsa(text_enc)
+            self.fin = rsa.generate_enc_message()
+            self.textEdit.setText(self.fin[-1])
+            self.textEdit_3.setText(
+                f'Ключ который нужно передать собеседнику: {self.fin[0]}\nПриватный ключ: {self.fin[1]}')
+            self.buttonBox = QMessageBox()
+            self.buttonBox.setWindowTitle('Сохранение ключа')
+            self.buttonBox.setText("Вы хотите запомнить ключи, чтобы не вводить их каждый раз?")
+            self.buttonBox.setIcon(QMessageBox.Warning)
+            self.buttonBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+            self.buttonBox.buttonClicked.connect(self.write_db_key_rsa)
+            self.buttonBox.exec_()
+
+    def write_db_key_rsa(self, btn):
+        if btn.text() == '&Yes':
+            global list1
+            print(list1[0])
+            db.insert_key_rsa(self.fin[0], self.fin[1], list1[0])
+        else:
+            pass
+
+    def beak_to_alg_enc(self):
+        self.alg_enc = AlgoritmEncript()
+        self.alg_enc.show()
+        self.close()
+
+    def beak_to_my_widg(self):
+        self.mywidget = MyWidget()
+        self.mywidget.show()
+        self.close()
+
+
 class AesEncr(form_aes_encr, base_aes_encr):
     def __init__(self):
         super(base_aes_encr, self).__init__()
@@ -72,17 +139,35 @@ class AesEncr(form_aes_encr, base_aes_encr):
         text_enc = self.textEdit_2.toPlainText()
         if self.radioButton_3.isChecked():
             if text_enc != '':
-                aes_256 = Aes(256)
-                aes_256.generate_key()
-                self.textEdit.setText(str(aes_256.enc_aes(text_enc)))
-                self.textEdit_3.setText(aes_256.print_key())
+                self.aes = Aes(256)
+                self.aes.generate_key()
+                self.textEdit.setText(str(self.aes.enc_aes(text_enc)))
+                self.textEdit_3.setText(self.aes.print_key())
         elif self.radioButton_2.isChecked():
             if text_enc != '':
-                aes_128 = Aes(128)
-                aes_128.generate_key()
-                text = str(aes_128.enc_aes(text_enc))
+                self.aes = Aes(128)
+                self.aes.generate_key()
+                text = str(self.aes.enc_aes(text_enc))
                 self.textEdit.setText(text)
-                self.textEdit_3.setText(aes_128.print_key())
+                self.textEdit_3.setText(self.aes.print_key())
+
+        self.buttonBox = QMessageBox()
+        self.buttonBox.setWindowTitle('Сохранение ключа')
+        self.buttonBox.setText("Вы хотите запомнить ключ, чтобы не вводить его каждый раз при дешифровке?")
+        self.buttonBox.setIcon(QMessageBox.Warning)
+        self.buttonBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.buttonBox.buttonClicked.connect(self.write_db_key_rsa)
+        self.buttonBox.exec_()
+
+    def write_db_key_rsa(self, btn):
+        if btn.text() == '&Yes':
+            global list1
+            try:
+                db.insert_key_aes(self.aes.print_key(), list1[0])
+            except Exception as r:
+                print(r)
+        else:
+            pass
 
     def beak_to_alg_enc(self):
         self.alg_enc = AlgoritmEncript()
@@ -130,9 +215,15 @@ class AlgoritmDecript(form_algoritm, base_algoritm):
     def __init__(self):
         super(base_algoritm, self).__init__()
         self.setupUi(self)
+        self.Button_RSA.clicked.connect(self.rsa)
         self.Button_AES.clicked.connect(self.aes)
         self.Button_Cezar.clicked.connect(self.caesar_cipher_dec)
         self.pushButton.clicked.connect(self.beak_to_MyWidget)
+
+    def rsa(self):
+        self.rsa = RsaDecr()
+        self.rsa.show()
+        self.close()
 
     def beak_to_MyWidget(self):
         self.mywidget = MyWidget()
@@ -150,6 +241,32 @@ class AlgoritmDecript(form_algoritm, base_algoritm):
         self.close()
 
 
+class RsaDecr(form_rsa_encr, base_rsa_encr):
+    def __init__(self):
+        super(base_rsa_encr, self).__init__()
+        self.setupUi(self)
+        self.pushButton.clicked.connect(self.decrypt)
+        self.pushButton_2.clicked.connect(self.beak_to_alg_enc)
+        self.pushButton_3.clicked.connect(self.beak_to_my_widg)
+
+    def decrypt(self):
+        text_enc = self.textEdit_2.toPlainText()
+        key = self.textEdit_3.toPlainText()
+        if text_enc != '':
+            rsa = Rsa(text_enc)
+            self.textEdit.setText(rsa.decript(key, text_enc))
+
+    def beak_to_alg_enc(self):
+        self.alg_enc = AlgoritmDecript()
+        self.alg_enc.show()
+        self.close()
+
+    def beak_to_my_widg(self):
+        self.mywidget = MyWidget()
+        self.mywidget.show()
+        self.close()
+
+
 class AesDecr(form_aes_decr, base_aes_decr):
     def __init__(self):
         super(base_aes_decr, self).__init__()
@@ -159,15 +276,19 @@ class AesDecr(form_aes_decr, base_aes_decr):
         self.pushButton_3.clicked.connect(self.beak_to_my_widg)
 
     def decrypt(self):
+        global list1
         text_enc = self.textEdit_2.toPlainText()
         text_enc = base64.b64decode(text_enc)
         key = self.textEdit_3.toPlainText()
         if text_enc != '':
             aes = Aes(128)
-            self.textEdit.setText(aes.dec_aes(text_enc, key))
+            if db.select_key_aes(list1[0]) is not None:
+                self.textEdit.setText(aes.dec_aes(text_enc, str(db.select_key_aes(list1[0]))[3:-4]))
+            else:
+                self.textEdit.setText(aes.dec_aes(text_enc, key))
 
     def beak_to_alg_enc(self):
-        self.alg_enc = AlgoritmEncript()
+        self.alg_enc = AlgoritmDecript()
         self.alg_enc.show()
         self.close()
 
