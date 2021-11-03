@@ -30,16 +30,30 @@ class Database:
         """
         self.execute(sql)
 
+    def select_key_aes(self, user):
+        sql = f"""select key_aes from Keys WHERE name='{user}'"""
+        self.cur.execute(sql)
+        return self.cur.fetchall()
+
+    def insert_key_ceazar(self, key, user):
+        sql = f"""
+        update Keys set key_ceasar='{key}' WHERE name='{user}'
+        """
+        self.execute(sql)
+
+    def select_key_ceazar(self, user):
+        sql = f"""select key_ceasar from Keys WHERE name='{user}'"""
+        self.cur.execute(sql)
+        return self.cur.fetchall()
+
     def insert_key_rsa(self, key_open, key_privat, user):
         sql = f"""
-                update Keys set key_rsa_open='{str(key_open)}', key_rsa_privat='{str(key_privat)}' WHERE name='{user}'
+                update Keys set key_rsa_open='{key_open}', key_rsa_privat='{key_privat}' WHERE name='{user}'
                 """
         self.execute(sql)
 
-
-
-    def select_key_aes(self, user):
-        sql = f"""select key_aes from Keys WHERE name='{user}'"""
+    def select_key_rsa(self, user):
+        sql = f"""select key_rsa_open, key_rsa_privat from Keys WHERE name='{user}'"""
         self.cur.execute(sql)
         return self.cur.fetchall()
 
@@ -49,20 +63,9 @@ class Database:
                 """
         self.execute(sql)
 
+
 # db = Database()
 # db.create_table_users()
-# db.insert_name('asdasd')
-# con = psycopg2.connect(
-#             database="postgres",
-#             user="postgres",
-#             password="24651asd",
-#             host="localhost",
-#             port="5432"
-#         )
-# cur = con.cursor()
-# print(cur.execute('select key_aes from Keys'))
-# records = cur.fetchall()
-# print(records)
-# ex = Database()
-# print(ex.s('a'))
-# ex.insert_key_rsa('sdfsfsdfsdf', '24324234', 'xxx')
+# db.insert_key_rsa('0000000000', '111111111111', 'ннн')
+# print(db.select_key_rsa('p')[0][1])
+

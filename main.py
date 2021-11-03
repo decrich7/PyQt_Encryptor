@@ -1,17 +1,15 @@
 # -*- coding: utf-8 -*-
 import base64
 import sqlite3
-
-import psycopg2
-
 from DB_API import Database
 from encryption_algorithms.caesar_cipher import CaesarRu, CaesarEn
 from encryption_algorithms.AES import Aes
 from encryption_algorithms.RSA import Rsa
 import sys
-from PyQt5 import uic, QtWidgets, QtGui, QtCore
-from PyQt5.QtWidgets import QApplication, QMessageBox, QDialogButtonBox, QColorDialog, QPushButton, QInputDialog
-from untitled import Ui_MainWindow
+from PyQt5 import uic, QtWidgets
+from PyQt5.QtWidgets import QApplication, QMessageBox, QInputDialog
+from ui_designs.untitled import Ui_MainWindow
+from ui_designs.aes_dec_py import Ui_MainWindowAesDec
 
 db = Database()
 # form_1, base_1 = uic.loadUiType('ui_designs/untitled.ui')
@@ -29,6 +27,8 @@ list1 = []
 class MyWidget(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
+        db.create_table_users()
+
         self.setupUi(self)
         if len(list1) == 0:
             name, ok_pressed = QInputDialog.getText(self, "Nickname", "Введите ваш Nickname")
@@ -156,16 +156,13 @@ class AesEncr(form_aes_encr, base_aes_encr):
         self.buttonBox.setText("Вы хотите запомнить ключ, чтобы не вводить его каждый раз при дешифровке?")
         self.buttonBox.setIcon(QMessageBox.Warning)
         self.buttonBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-        self.buttonBox.buttonClicked.connect(self.write_db_key_rsa)
+        self.buttonBox.buttonClicked.connect(self.write_db_key_aes)
         self.buttonBox.exec_()
 
-    def write_db_key_rsa(self, btn):
+    def write_db_key_aes(self, btn):
         if btn.text() == '&Yes':
             global list1
-            try:
-                db.insert_key_aes(self.aes.print_key(), list1[0])
-            except Exception as r:
-                print(r)
+            db.insert_key_aes(self.aes.print_key(), list1[0])
         else:
             pass
 
@@ -190,15 +187,30 @@ class Window_Caesar(form_ceasar, base_ceasar):
 
     def encrypt(self):
         text_enc = self.textEdit_2.toPlainText()
-        key = self.spinBox.value()
+        self.key = self.spinBox.value()
         if self.radioButton.isChecked():
-            if text_enc != '' and key <= 33:
-                enc = CaesarRu(key, text_enc)
+            if text_enc != '' and self.key <= 33:
+                enc = CaesarRu(self.key, text_enc)
                 self.textEdit.setText(enc.cipher())
         elif self.radioButton_2.isChecked():
-            if text_enc != '' and key <= 33:
-                enc = CaesarEn(key, text_enc)
+            if text_enc != '' and self.key <= 33:
+                enc = CaesarEn(self.key, text_enc)
                 self.textEdit.setText(enc.cipher())
+
+        self.buttonBox = QMessageBox()
+        self.buttonBox.setWindowTitle('Сохранение ключа')
+        self.buttonBox.setText("Вы хотите запомнить ключ, чтобы не вводить его каждый раз при дешифровке?")
+        self.buttonBox.setIcon(QMessageBox.Warning)
+        self.buttonBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+        self.buttonBox.buttonClicked.connect(self.insert_key_ceazar)
+        self.buttonBox.exec_()
+
+    def insert_key_ceazar(self, btn):
+        if btn.text() == '&Yes':
+            global list1
+            db.insert_key_ceazar(self.key, list1[0])
+        else:
+            pass
 
     def beak_to_alg_enc(self):
         self.alg_enc = AlgoritmEncript()
@@ -252,9 +264,14 @@ class RsaDecr(form_rsa_encr, base_rsa_encr):
     def decrypt(self):
         text_enc = self.textEdit_2.toPlainText()
         key = self.textEdit_3.toPlainText()
+        rsa = Rsa(text_enc)
+
         if text_enc != '':
-            rsa = Rsa(text_enc)
-            self.textEdit.setText(rsa.decript(key, text_enc))
+            if db.select_key_rsa(list1[0])[0][1] is not None:
+                self.textEdit.setText(rsa.decript(db.select_key_rsa(list1[0])[0][1], text_enc))
+            else:
+                self.textEdit.setText(rsa.decript(key, text_enc))
+
 
     def beak_to_alg_enc(self):
         self.alg_enc = AlgoritmDecript()
@@ -267,9 +284,9 @@ class RsaDecr(form_rsa_encr, base_rsa_encr):
         self.close()
 
 
-class AesDecr(form_aes_decr, base_aes_decr):
+class AesDecr(QtWidgets.QMainWindow, Ui_MainWindowAesDec):
     def __init__(self):
-        super(base_aes_decr, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.pushButton.clicked.connect(self.decrypt)
         self.pushButton_2.clicked.connect(self.beak_to_alg_enc)
@@ -282,7 +299,7 @@ class AesDecr(form_aes_decr, base_aes_decr):
         key = self.textEdit_3.toPlainText()
         if text_enc != '':
             aes = Aes(128)
-            if db.select_key_aes(list1[0]) is not None:
+            if db.select_key_aes(list1[0])[0][0] is not None:
                 self.textEdit.setText(aes.dec_aes(text_enc, str(db.select_key_aes(list1[0]))[3:-4]))
             else:
                 self.textEdit.setText(aes.dec_aes(text_enc, key))
@@ -316,12 +333,20 @@ class WindowCaesarDec(form_ceasar_dec, base_ceasar_dec):
         key = self.spinBox.value()
         if self.radioButton.isChecked():
             if text_enc != '' and key <= 33:
-                enc = CaesarRu(key, text_enc)
-                self.textEdit.setText(enc.dec())
+                if db.select_key_ceazar(list1[0])[0][0] is not None:
+                    enc = CaesarRu(int(db.select_key_ceazar(list1[0])[0][0]), text_enc)
+                    self.textEdit.setText(enc.dec())
+                else:
+                    enc = CaesarRu(key, text_enc)
+                    self.textEdit.setText(enc.dec())
         elif self.radioButton_2.isChecked():
             if text_enc != '' and key <= 33:
-                enc = CaesarEn(key, text_enc)
-                self.textEdit.setText(enc.dec())
+                if db.select_key_ceazar(list1[0])[0][0] is not None:
+                    enc = CaesarEn(int(db.select_key_ceazar(list1[0])[0][0]), text_enc)
+                    self.textEdit.setText(enc.dec())
+                else:
+                    enc = CaesarEn(key, text_enc)
+                    self.textEdit.setText(enc.dec())
 
     def beak_to_my_widg(self):
         self.mywidget = MyWidget()
