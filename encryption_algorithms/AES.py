@@ -42,9 +42,10 @@ class Aes:
         aes = pyaes.AESModeOfOperationCTR(key)
         str_aes = aes.encrypt(plaintext)
         return str_aes
-    def dec_aes_file(self):
-        key = open('C:/Users/PAJILOY PAVUK/PycharmProjects/PyQt_Encryptor/keyAes.bin', 'rb').read()
-        message = open('C:/Users/PAJILOY PAVUK/PycharmProjects/PyQt_Encryptor/encrypted_message.bin', 'rb').read()
+
+    def dec_aes_file(self, key_path, msg_path):
+        key = open(key_path, 'rb').read()
+        message = open(msg_path, 'rb').read()
         aes = pyaes.AESModeOfOperationCTR(key)
         decrypted = aes.decrypt(message).decode('utf-8')
         return decrypted
@@ -54,10 +55,10 @@ class Aes:
         decrypted = aes.decrypt(message).decode('utf-8')
         return decrypted
 
-ex = Aes(128)
+# ex = Aes(128)
 # ex.generate_key()
 # print(ex.print_key())
-print(ex.dec_aes_file())
+# print(ex.dec_aes_file())
 # dfg = ex.enc_aes('За эту победу юный князь Александр получил почетное прозвище Невский.')
 # print(ex.print_key(), 'key')
 # print(dfg)

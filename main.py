@@ -16,7 +16,8 @@ from ui_designs.caesar_py import Ui_MainWindowCaezar
 from ui_designs.ceasar_dec_py import Ui_MainWindowCaezarDec
 from ui_designs.rsa_dec_py import Ui_MainWindowRsaDec
 from ui_designs.rsa_enc_py import Ui_MainWindowRsaEnc
-
+from ui_designs.aes_dec_file import Ui_MainWindowDecFile
+from ui_designs.aes_enc_file import Ui_MainWindowEncFile
 db = Database()
 # form_file, base_file = uic.loadUiType('ui_designs/aes_enc_file.ui')
 # form_1, base_1 = uic.loadUiType('ui_designs/untitled.ui')
@@ -48,6 +49,12 @@ class MyWidget(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.run_algoritm_encript)
         self.pushButton_2.clicked.connect(self.run_algoritm_decript)
         self.pushButton_3.clicked.connect(self.run_enc_file)
+        self.pushButton_4.clicked.connect(self.run_dec_file)
+
+    def run_dec_file(self):
+        self.dec_file = DecFile()
+        self.dec_file.show()
+        self.close()
 
     def run_enc_file(self):
         self.enc_file = EncFile()
@@ -381,10 +388,10 @@ class WindowCaesarDec(QtWidgets.QMainWindow, Ui_MainWindowCaezarDec):
         self.close()
 
 
-class EncFile(QMainWindow):
+class EncFile(QtWidgets.QMainWindow, Ui_MainWindowEncFile):
     def __init__(self):
         super().__init__()
-        uic.loadUi('ui_designs/aes_enc_file.ui', self)
+        self.setupUi(self)
         self.path_key = ''
         self.pushButton.clicked.connect(self.enc)
         self.pushButton_2.clicked.connect(self.beak_to_my_widg)
@@ -433,7 +440,35 @@ class EncFile(QMainWindow):
         self.path = QFileDialog.getOpenFileName(self, 'Выбрать текстовый файл', '', 'Текстовый файл (*.txt)')[0]
 
     def choise_key(self):
-        self.path_key = QFileDialog.getOpenFileName(self, 'Выбрать текстовый файл', '', 'Ключ шифрования (*.bin)')[0]
+        self.path_key = QFileDialog.getOpenFileName(self, 'Выбрать файл с ключем', '', 'Ключ шифрования (*.bin)')[0]
+
+
+class DecFile(QtWidgets.QMainWindow, Ui_MainWindowDecFile):
+    def __init__(self):
+        super().__init__()
+        self.setupUi(self)
+        self.pushButton.clicked.connect(self.dec)
+        self.pushButton_2.clicked.connect(self.beak_to_my_widg)
+        self.pushButton_3.clicked.connect(self.beak_to_my_widg)
+        self.pushButton_4.clicked.connect(self.choise_file_dec)
+        self.pushButton_5.clicked.connect(self.choise_key)
+
+    def dec(self):
+        if self.path_key != '' and self.path_file != '':
+            dec_aes = Aes(000)
+            text_decript = dec_aes.dec_aes_file(self.path_key, self.path_file)
+            open('Decript_message.txt', 'w').write(text_decript)
+
+    def beak_to_my_widg(self):
+        self.mywidget = MyWidget()
+        self.mywidget.show()
+        self.close()
+
+    def choise_file_dec(self):
+        self.path_file = QFileDialog.getOpenFileName(self, 'Выбрать зашифрованный файл', '', '(*.bin)')[0]
+
+    def choise_key(self):
+        self.path_key = QFileDialog.getOpenFileName(self, 'Выбрать файл с ключем', '', 'Ключ шифрования (*.bin)')[0]
 
 
 if __name__ == '__main__':

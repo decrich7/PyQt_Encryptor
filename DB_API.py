@@ -69,7 +69,7 @@ class Database:
         self.execute(sql)
 
 
-# db = Database()
+# pyinstaller --onefile --noconsole main.py encryption_algorithms/AES.py encryption_algorithms/caesar_cipher.py encryption_algorithms/RSA.py ui_designs/aes_dec_py.py ui_designs/aes_enc_py.py ui_designs/algoritm_encript_py.py ui_designs/caesar_py.py ui_designs/ceasar_dec_py.py ui_designs/rsa_dec_py.py ui_designs/rsa_enc_py.py ui_designs/untitled.py DB_API.py
 # db.create_table_users()
 # db.delete_key_rsa('dfgdfg')
 # print(db.select_key_rsa('p')[0][1])
