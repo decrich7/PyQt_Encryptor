@@ -17,8 +17,6 @@ class Aes:
             self.key = ''.join(random.choice(string.ascii_lowercase) for i in range(self.size // 8))
         elif self.size == 128:
             self.key = ''.join(random.choice(string.ascii_lowercase) for i in range(self.size // 8))
-        elif self.size == 64:
-            self.key = ''.join(random.choice(string.ascii_lowercase) for i in range(self.size // 8))
 
     def print_key(self):
         return self.key
@@ -31,14 +29,35 @@ class Aes:
         txt = base64.b64encode(str_aes)
         return txt.decode('utf-8')
 
-    def dec_aes(self, message, key):
+    def enc_aes_file(self, message):
+        plaintext = message.encode('utf-8')
+        key = self.key.encode('utf-8')
+        aes = pyaes.AESModeOfOperationCTR(key)
+        str_aes = aes.encrypt(plaintext)
+        return str_aes
 
+    def enc_aes_file_key(self, message, key):
+        plaintext = message.encode('utf-8')
+        key = key.encode('utf-8')
+        aes = pyaes.AESModeOfOperationCTR(key)
+        str_aes = aes.encrypt(plaintext)
+        return str_aes
+    def dec_aes_file(self):
+        key = open('C:/Users/PAJILOY PAVUK/PycharmProjects/PyQt_Encryptor/keyAes.bin', 'rb').read()
+        message = open('C:/Users/PAJILOY PAVUK/PycharmProjects/PyQt_Encryptor/encrypted_message.bin', 'rb').read()
+        aes = pyaes.AESModeOfOperationCTR(key)
+        decrypted = aes.decrypt(message).decode('utf-8')
+        return decrypted
+
+    def dec_aes(self, message, key):
         aes = pyaes.AESModeOfOperationCTR(key.encode('utf-8'))
         decrypted = aes.decrypt(message).decode('utf-8')
         return decrypted
 
-# ex = Aes(128)
+ex = Aes(128)
 # ex.generate_key()
+# print(ex.print_key())
+print(ex.dec_aes_file())
 # dfg = ex.enc_aes('За эту победу юный князь Александр получил почетное прозвище Невский.')
 # print(ex.print_key(), 'key')
 # print(dfg)

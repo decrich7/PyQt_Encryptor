@@ -6,20 +6,27 @@ from encryption_algorithms.caesar_cipher import CaesarRu, CaesarEn
 from encryption_algorithms.AES import Aes
 from encryption_algorithms.RSA import Rsa
 import sys
-from PyQt5 import uic, QtWidgets
-from PyQt5.QtWidgets import QApplication, QMessageBox, QInputDialog
+from PyQt5 import QtWidgets, uic
+from PyQt5.QtWidgets import QApplication, QMessageBox, QInputDialog, QMainWindow, QFileDialog
 from ui_designs.untitled import Ui_MainWindow
 from ui_designs.aes_dec_py import Ui_MainWindowAesDec
+from ui_designs.aes_enc_py import Ui_MainWindowAesEnc
+from ui_designs.algoritm_encript_py import Ui_MainWindowAlgoritmEncript
+from ui_designs.caesar_py import Ui_MainWindowCaezar
+from ui_designs.ceasar_dec_py import Ui_MainWindowCaezarDec
+from ui_designs.rsa_dec_py import Ui_MainWindowRsaDec
+from ui_designs.rsa_enc_py import Ui_MainWindowRsaEnc
 
 db = Database()
+# form_file, base_file = uic.loadUiType('ui_designs/aes_enc_file.ui')
 # form_1, base_1 = uic.loadUiType('ui_designs/untitled.ui')
-form_algoritm, base_algoritm = uic.loadUiType('ui_designs/algoritm_encript.ui')
-form_ceasar, base_ceasar = uic.loadUiType('ui_designs/caesar.ui')
-form_ceasar_dec, base_ceasar_dec = uic.loadUiType('ui_designs/caesar_dec.ui')
-form_aes_encr, base_aes_encr = uic.loadUiType('ui_designs/aes_enc.ui')
-form_aes_decr, base_aes_decr = uic.loadUiType('ui_designs/aes_dec.ui')
-form_rsa_encr, base_rsa_encr = uic.loadUiType('ui_designs/rsa_enc.ui')
-form_rsa_encr, base_rsa_encr = uic.loadUiType('ui_designs/rsa_dec.ui')
+# form_algoritm, base_algoritm = uic.loadUiType('ui_designs/algoritm_encript.ui')
+# form_ceasar, base_ceasar = uic.loadUiType('ui_designs/caesar.ui')
+# form_ceasar_dec, base_ceasar_dec = uic.loadUiType('ui_designs/caesar_dec.ui')
+# form_aes_encr, base_aes_encr = uic.loadUiType('ui_designs/aes_enc.ui')
+# form_aes_decr, base_aes_decr = uic.loadUiType('ui_designs/aes_dec.ui')
+# form_rsa_encr, base_rsa_encr = uic.loadUiType('ui_designs/rsa_enc.ui')
+# form_rsa_encr, base_rsa_encr = uic.loadUiType('ui_designs/rsa_dec.ui')
 
 list1 = []
 
@@ -28,7 +35,6 @@ class MyWidget(QtWidgets.QMainWindow, Ui_MainWindow):
     def __init__(self):
         super().__init__()
         db.create_table_users()
-
         self.setupUi(self)
         if len(list1) == 0:
             name, ok_pressed = QInputDialog.getText(self, "Nickname", "Введите ваш Nickname")
@@ -41,6 +47,12 @@ class MyWidget(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.pushButton.clicked.connect(self.run_algoritm_encript)
         self.pushButton_2.clicked.connect(self.run_algoritm_decript)
+        self.pushButton_3.clicked.connect(self.run_enc_file)
+
+    def run_enc_file(self):
+        self.enc_file = EncFile()
+        self.enc_file.show()
+        self.close()
 
     def run_algoritm_encript(self):
         self.algoritm_encript = AlgoritmEncript()
@@ -53,9 +65,9 @@ class MyWidget(QtWidgets.QMainWindow, Ui_MainWindow):
         self.close()
 
 
-class AlgoritmEncript(form_algoritm, base_algoritm):
+class AlgoritmEncript(QtWidgets.QMainWindow, Ui_MainWindowAlgoritmEncript):
     def __init__(self):
-        super(base_algoritm, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.Button_RSA.clicked.connect(self.rsa)
         self.Button_Cezar.clicked.connect(self.Caesar_Cipher)
@@ -81,37 +93,53 @@ class AlgoritmEncript(form_algoritm, base_algoritm):
         self.window_Caesar = Window_Caesar()
         self.window_Caesar.show()
         self.close()
-        # enc_caesar = Caesar()
 
 
-class RsaEnc(form_rsa_encr, base_rsa_encr):
+class RsaEnc(QtWidgets.QMainWindow, Ui_MainWindowRsaEnc):
     def __init__(self):
-        super(base_rsa_encr, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.pushButton.clicked.connect(self.encrypt)
         self.pushButton_2.clicked.connect(self.beak_to_alg_enc)
         self.pushButton_3.clicked.connect(self.beak_to_my_widg)
+        self.pushButton_4.clicked.connect(self.delete_key)
+        self.pushButton_5.clicked.connect(self.print_key)
+
+    def print_key(self):
+
+        self.textEdit_3.setText(
+            f'Ключ который нужно передать собеседнику: {db.select_key_rsa(list1[0])[0][0]}\nПриватный ключ:'
+            f' {db.select_key_rsa(list1[0])[0][1]}')
+
+
+    def delete_key(self):
+        db.delete_key_rsa(list1[0])
+        self.textEdit_3.setText('Ключи удалены')
+
 
     def encrypt(self):
         text_enc = self.textEdit_2.toPlainText()
         if text_enc != '':
-            rsa = Rsa(text_enc)
-            self.fin = rsa.generate_enc_message()
-            self.textEdit.setText(self.fin[-1])
-            self.textEdit_3.setText(
-                f'Ключ который нужно передать собеседнику: {self.fin[0]}\nПриватный ключ: {self.fin[1]}')
-            self.buttonBox = QMessageBox()
-            self.buttonBox.setWindowTitle('Сохранение ключа')
-            self.buttonBox.setText("Вы хотите запомнить ключи, чтобы не вводить их каждый раз?")
-            self.buttonBox.setIcon(QMessageBox.Warning)
-            self.buttonBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
-            self.buttonBox.buttonClicked.connect(self.write_db_key_rsa)
-            self.buttonBox.exec_()
+            if self.textEdit_3.toPlainText() != '':
+                rsa = Rsa(text_enc)
+                self.textEdit.setText(rsa.encript(self.textEdit_3.toPlainText(), text_enc))
+            else:
+                rsa = Rsa(text_enc)
+                self.fin = rsa.generate_enc_message()
+                self.textEdit.setText(self.fin[-1])
+                self.textEdit_3.setText(
+                    f'Ключ который нужно передать собеседнику: {self.fin[0]}\nПриватный ключ: {self.fin[1]}')
+                self.buttonBox = QMessageBox()
+                self.buttonBox.setWindowTitle('Сохранение ключа')
+                self.buttonBox.setText("Вы хотите запомнить ключи, чтобы не вводить их каждый раз?")
+                self.buttonBox.setIcon(QMessageBox.Warning)
+                self.buttonBox.setStandardButtons(QMessageBox.Yes | QMessageBox.No)
+                self.buttonBox.buttonClicked.connect(self.write_db_key_rsa)
+                self.buttonBox.exec_()
 
     def write_db_key_rsa(self, btn):
         if btn.text() == '&Yes':
             global list1
-            print(list1[0])
             db.insert_key_rsa(self.fin[0], self.fin[1], list1[0])
         else:
             pass
@@ -127,9 +155,9 @@ class RsaEnc(form_rsa_encr, base_rsa_encr):
         self.close()
 
 
-class AesEncr(form_aes_encr, base_aes_encr):
+class AesEncr(QtWidgets.QMainWindow, Ui_MainWindowAesEnc):
     def __init__(self):
-        super(base_aes_encr, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.pushButton.clicked.connect(self.encrypt)
         self.pushButton_2.clicked.connect(self.beak_to_alg_enc)
@@ -177,9 +205,9 @@ class AesEncr(form_aes_encr, base_aes_encr):
         self.close()
 
 
-class Window_Caesar(form_ceasar, base_ceasar):
+class Window_Caesar(QtWidgets.QMainWindow, Ui_MainWindowCaezar):
     def __init__(self):
-        super(base_ceasar, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.pushButton.clicked.connect(self.encrypt)
         self.pushButton_2.clicked.connect(self.beak_to_alg_enc)
@@ -223,9 +251,9 @@ class Window_Caesar(form_ceasar, base_ceasar):
         self.close()
 
 
-class AlgoritmDecript(form_algoritm, base_algoritm):
+class AlgoritmDecript(QtWidgets.QMainWindow, Ui_MainWindowAlgoritmEncript):
     def __init__(self):
-        super(base_algoritm, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.Button_RSA.clicked.connect(self.rsa)
         self.Button_AES.clicked.connect(self.aes)
@@ -253,9 +281,9 @@ class AlgoritmDecript(form_algoritm, base_algoritm):
         self.close()
 
 
-class RsaDecr(form_rsa_encr, base_rsa_encr):
+class RsaDecr(QtWidgets.QMainWindow, Ui_MainWindowRsaDec):
     def __init__(self):
-        super(base_rsa_encr, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.pushButton.clicked.connect(self.decrypt)
         self.pushButton_2.clicked.connect(self.beak_to_alg_enc)
@@ -271,7 +299,6 @@ class RsaDecr(form_rsa_encr, base_rsa_encr):
                 self.textEdit.setText(rsa.decript(db.select_key_rsa(list1[0])[0][1], text_enc))
             else:
                 self.textEdit.setText(rsa.decript(key, text_enc))
-
 
     def beak_to_alg_enc(self):
         self.alg_enc = AlgoritmDecript()
@@ -315,9 +342,9 @@ class AesDecr(QtWidgets.QMainWindow, Ui_MainWindowAesDec):
         self.close()
 
 
-class WindowCaesarDec(form_ceasar_dec, base_ceasar_dec):
+class WindowCaesarDec(QtWidgets.QMainWindow, Ui_MainWindowCaezarDec):
     def __init__(self):
-        super(base_ceasar_dec, self).__init__()
+        super().__init__()
         self.setupUi(self)
         self.pushButton.clicked.connect(self.decrypt)
         self.pushButton_2.clicked.connect(self.beak_to_alg_dec)
@@ -352,6 +379,61 @@ class WindowCaesarDec(form_ceasar_dec, base_ceasar_dec):
         self.mywidget = MyWidget()
         self.mywidget.show()
         self.close()
+
+
+class EncFile(QMainWindow):
+    def __init__(self):
+        super().__init__()
+        uic.loadUi('ui_designs/aes_enc_file.ui', self)
+        self.path_key = ''
+        self.pushButton.clicked.connect(self.enc)
+        self.pushButton_2.clicked.connect(self.beak_to_my_widg)
+        self.pushButton_3.clicked.connect(self.beak_to_my_widg)
+        self.pushButton_4.clicked.connect(self.choise_file_enc)
+        self.pushButton_5.clicked.connect(self.choise_key)
+
+    def enc(self):
+        if self.path != '':
+            self.text = open(self.path).read()
+            if self.path_key != '':
+                self.key = str(open(self.path_key, 'rb').read())[2:-1]
+                self.aes = Aes(000)
+                enc_text = self.aes.enc_aes_file_key(self.text, self.key)
+                file = open('encrypted_message.bin', 'wb')
+                file.write(enc_text)
+                file.close()
+
+            if self.radioButton_3.isChecked():
+
+                self.aes = Aes(256)
+                self.aes.generate_key()
+                enc_text_256 = open('encrypted_message_256.bin', 'wb')
+                enc_text_256.write(self.aes.enc_aes_file(self.text))
+                enc_text_256.close()
+                key = open('keyAes.bin', 'wb')
+                key.write(bytes(self.aes.print_key(), 'utf-8'))
+                key.close()
+
+            elif self.radioButton_2.isChecked():
+                self.aes = Aes(128)
+                self.aes.generate_key()
+                enc_text_256 = open('encrypted_message_128.bin', 'wb')
+                enc_text_256.write(self.aes.enc_aes_file(self.text))
+                enc_text_256.close()
+                key = open('keyAes.bin', 'wb')
+                key.write(bytes(self.aes.print_key(), 'utf-8'))
+                key.close()
+
+    def beak_to_my_widg(self):
+        self.mywidget = MyWidget()
+        self.mywidget.show()
+        self.close()
+
+    def choise_file_enc(self):
+        self.path = QFileDialog.getOpenFileName(self, 'Выбрать текстовый файл', '', 'Текстовый файл (*.txt)')[0]
+
+    def choise_key(self):
+        self.path_key = QFileDialog.getOpenFileName(self, 'Выбрать текстовый файл', '', 'Ключ шифрования (*.bin)')[0]
 
 
 if __name__ == '__main__':

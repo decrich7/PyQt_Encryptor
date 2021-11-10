@@ -57,6 +57,11 @@ class Database:
         self.cur.execute(sql)
         return self.cur.fetchall()
 
+    def delete_key_rsa(self, user):
+        sql = f'''update Keys set key_rsa_open='', key_rsa_privat='' WHERE name='{user}'
+        '''
+        self.execute(sql)
+
     def insert_name(self, name):
         sql = f"""
                 INSERT INTO Keys (name) VALUES('{str(name).replace("'", '')}')
@@ -66,6 +71,6 @@ class Database:
 
 # db = Database()
 # db.create_table_users()
-# db.insert_key_rsa('0000000000', '111111111111', 'ннн')
+# db.delete_key_rsa('dfgdfg')
 # print(db.select_key_rsa('p')[0][1])
 

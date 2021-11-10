@@ -88,7 +88,7 @@ class Rsa:
         wordList = [num.to_bytes(2, byteorder='big') for num in encript]
         encoded = b''.join(wordList)
 
-        # ПОМЕЩЕНИЕ ОТКРЫТОЙ ЭКСПОНЕНТЫ И СУММЫ В СПИСОК e = открытая эксп r = секретная эксп N = сумма
+        # ПОМЕЩЕНИЕ ОТКРЫТОЙ ЭКСПОНЕНТЫ И СУММЫ В СПИСОК e = открытая эксп r.txt = секретная эксп N = сумма
 
         def open_key(e, N):
             list_key = [N, e]
@@ -110,7 +110,6 @@ class Rsa:
         list_word_index = [ord(i) for i in word]
         byte_key = base64.b64decode(key)
         decr_key = [int.from_bytes(byte_key[i:i + 2], byteorder='big') for i in range(0, len(byte_key), 2)]
-        print(decr_key)
 
         # ШИФРОВАНИЕ СПИСКА(СООБЩЕНИЯ)
         encript_msg = []
@@ -153,9 +152,9 @@ class Rsa:
         return ''.join(final_result)
 
 
-# ex = Rsa('лтавплдваопдвлапи тапиавп в ')
+# ex = Rsa('qwerty')
 # # print(ex.generate_enc_message())
 # # print(ex.decript(input(), input()))
-# # print(ex.decript())
+# print(ex.encript('aC8AAw==', 'qwerty'))
 # a = ('FL8AAw==', 'FL8hiw==', 'BkYARwZVFLEEJgZGC0MUsQZVCAQEJgtDFLEGRgZVBCYExQOGAEcGVQQmBMUGVRSxBCYDhhSxA4Y=')
 # print(ex.encript(a[0], 'лтавплдваопдвлапи тапиавп в '))
