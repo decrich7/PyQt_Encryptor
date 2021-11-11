@@ -4,7 +4,7 @@ import sqlite3
 
 class Database:
     def __init__(self):
-        self.con = sqlite3.connect('rest.db')
+        self.con = sqlite3.connect('Keys.db')
         self.cur = self.con.cursor()
 
     def execute(self, sql):
@@ -14,7 +14,7 @@ class Database:
     def create_table_users(self):
         sql = """
         CREATE TABLE IF NOT EXISTS Keys (
-        id SERIAL PRIMARY KEY,
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
         name TEXT NOT NULL UNIQUE,
         key_rsa_open TEXT NULL,
         key_rsa_privat TEXT NULL,
@@ -68,9 +68,4 @@ class Database:
                 """
         self.execute(sql)
 
-
 # pyinstaller --onefile --noconsole main.py encryption_algorithms/AES.py encryption_algorithms/caesar_cipher.py encryption_algorithms/RSA.py ui_designs/aes_dec_py.py ui_designs/aes_enc_py.py ui_designs/algoritm_encript_py.py ui_designs/caesar_py.py ui_designs/ceasar_dec_py.py ui_designs/rsa_dec_py.py ui_designs/rsa_enc_py.py ui_designs/untitled.py DB_API.py
-# db.create_table_users()
-# db.delete_key_rsa('dfgdfg')
-# print(db.select_key_rsa('p')[0][1])
-

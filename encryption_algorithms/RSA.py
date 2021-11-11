@@ -150,11 +150,3 @@ class Rsa:
         resalt_decript = decript(decript_massage(message), decr_key, f)
         final_result = [chr(i) for i in resalt_decript]
         return ''.join(final_result)
-
-
-# ex = Rsa('qwerty')
-# # print(ex.generate_enc_message())
-# # print(ex.decript(input(), input()))
-# print(ex.encript('aC8AAw==', 'qwerty'))
-# a = ('FL8AAw==', 'FL8hiw==', 'BkYARwZVFLEEJgZGC0MUsQZVCAQEJgtDFLEGRgZVBCYExQOGAEcGVQQmBMUGVRSxBCYDhhSxA4Y=')
-# print(ex.encript(a[0], 'лтавплдваопдвлапи тапиавп в '))

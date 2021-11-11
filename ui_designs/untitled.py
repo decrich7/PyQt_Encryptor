@@ -37,7 +37,12 @@ class Ui_MainWindow(object):
 "font-size: 45px;\n"
 " font-weight: bold;\n"
 "\n"
-"}")
+"}"
+"QInputDialog {\n"
+" background: #000;\n"
+"\n"
+"}"
+)
         self.centralwidget = QtWidgets.QWidget(MainWindow)
         self.centralwidget.setObjectName("centralwidget")
         self.gridLayoutWidget = QtWidgets.QWidget(self.centralwidget)
